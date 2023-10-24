@@ -4,11 +4,21 @@ import de.thi.inf.cnd.rest.model.Post;
 import de.thi.inf.cnd.rest.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 import java.util.UUID;
+
+// Versionierung
+// -> Erweiterung des Pfads ... z.B. /api/v1/post
+// -> Header, Version: v1
+// -> Query, ?version=1
+
+// Zustandsloses Protokoll?
+// -> Alles mitsenden, was notwendig ist
+// -> oder... eine möglichkeit die Sitzung wieder zu identifizieren
 
 
 @RestController
@@ -18,24 +28,40 @@ public class PostController {
     private PostRepository repository;
 
     @GetMapping
-    public Iterable<Post> listAll() {
+    public Iterable<Post> getAllPosts() {
         return repository.findAll();
     }
 
     @GetMapping("/{id}")
-    public Post findOne(@PathVariable UUID id) {
-        Optional<Post> result = repository.findById(id);
-        if(result.isEmpty()) {
+    public Post getOnePost(@PathVariable UUID id) {
+        Optional<Post> post = repository.findById(id);
+        if(post.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        return result.get();
+        return post.get();
     }
 
     @PostMapping
-    public void addOne(@RequestBody Post post) {
-        repository.save(post);
-        // 200 od 204
-        // neu erzeugte ID mit kommunizieren
-        // -> Location-Header
+    public Post createPost(@RequestBody Post post) {
+        return repository.save(post);
+    }
+
+    @PutMapping("/{id}")
+    public Post updatePost(@PathVariable UUID id, @RequestBody Post post) {
+        Optional<Post> oldPost = repository.findById(id);
+        if(oldPost.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return repository.save(oldPost.map(p -> {
+            p.setContent(post.getContent());
+            p.setTitle(post.getTitle());
+            return p;
+        }).get());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity deletePost(@PathVariable UUID id) {
+        repository.deleteById(id);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }

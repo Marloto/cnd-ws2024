@@ -1,6 +1,9 @@
 package de.thi.inf.cnd.rest.model;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Setter;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -11,12 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Entity
 @Data
 @AllArgsConstructor
-@Entity
 public class Post {
-    @Setter(AccessLevel.NONE)
     @Id
+    @Setter(AccessLevel.NONE)
     private UUID id;
     private String title;
     private String content;
