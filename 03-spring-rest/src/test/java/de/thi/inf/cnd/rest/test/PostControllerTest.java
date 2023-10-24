@@ -3,6 +3,7 @@ package de.thi.inf.cnd.rest.test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.thi.inf.cnd.rest.Application;
 import de.thi.inf.cnd.rest.model.Post;
+import de.thi.inf.cnd.rest.repository.PostRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
