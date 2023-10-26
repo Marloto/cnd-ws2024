@@ -1,0 +1,17 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package de.thi.inf.sesa.simplegrpc;
+
+message HelloRequest {
+  string firstName = 1;
+  string lastName = 2;
+  string middleName = 3;
+}
+
+message HelloResponse {
+  string message = 1;
+}
+
+service HelloService {
+  rpc hello(HelloRequest) returns (HelloResponse);
+}

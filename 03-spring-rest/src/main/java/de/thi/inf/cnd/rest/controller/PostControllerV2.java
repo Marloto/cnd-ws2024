@@ -13,19 +13,9 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.UUID;
 
-// Versionierung
-// -> Erweiterung des Pfads ... z.B. /api/v1/post
-// -> Header, Version: v1
-// -> Query, ?version=1
-
-// Zustandsloses Protokoll?
-// -> Alles mitsenden, was notwendig ist
-// -> oder... eine möglichkeit die Sitzung wieder zu identifizieren
-
-
 @RestController
-@RequestMapping("/api/v1/posts")
-public class PostController {
+@RequestMapping("/api/v2/posts")
+public class PostControllerV2 {
     @Autowired
     private PostRepository repository;
 

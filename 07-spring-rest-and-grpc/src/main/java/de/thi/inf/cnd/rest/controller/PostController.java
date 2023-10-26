@@ -7,24 +7,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.util.Optional;
 import java.util.UUID;
 
-// Versionierung
-// -> Erweiterung des Pfads ... z.B. /api/v1/post
-// -> Header, Version: v1
-// -> Query, ?version=1
-
-// Zustandsloses Protokoll?
-// -> Alles mitsenden, was notwendig ist
-// -> oder... eine möglichkeit die Sitzung wieder zu identifizieren
 
 
 @RestController
-@RequestMapping("/api/v1/posts")
+@RequestMapping("/posts")
 public class PostController {
     @Autowired
     private PostRepository repository;
@@ -44,18 +34,12 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createPost(@RequestBody Post post) {
-        Post entry = new Post();
-        entry.setDate(post.getDate());
-        entry.setTitle(post.getTitle());
-        entry.setContent(post.getContent());
-        Post newEntry = repository.save(entry);
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(newEntry.getId())
-                .toUri();
-        return ResponseEntity.created(location).build();
+    public Post createPost(@RequestBody Post post) {
+        /** Wie über MQTT publizieren, dass eine neue Nachricht erzeugt wurde? **/
+        /** Client wrappen (singleton), für die Verbindung - möglichkeiten schaffen
+         *  schaffen um das ereignis dann an diesen singleton weiterzugeben,
+         *  damit er das publiziert **/
+        return repository.save(post);
     }
 
     @PutMapping("/{id}")
