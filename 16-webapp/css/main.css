@@ -1,0 +1,16 @@
+html {
+    font-family: sans-serif;
+    font-size: 16px;
+}
+html, body {
+    margin: 0px;
+    padding: 0px;
+}
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    font-size: 1.25em;
+    box-sizing: border-box;
+    padding: 0 15px;
+}
+

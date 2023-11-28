@@ -1,0 +1,5 @@
+POST https://online-lectures-cs.thi.de/chat/ab1dadb4-6a86-4415-9592-82249f269fba/register HTTP/1.1
+Host: online-lectures-cs.thi.de
+Content-type: application/json
+
+{"username": "Tom2", "password": "12345678"}
