@@ -1,5 +1,5 @@
 # YAML: Markup Language, vgl. XML, JSON, usw.
-version: "3"
+version: "3.4"
 
 services:
   # vgl. Docker-CLI: docker run alpine:3.18.3 echo "Hello, world"
@@ -34,14 +34,22 @@ services:
     #   SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.jdbc.Driver
     #   MQTT_BROKER: tcp://broker:1883
     command: --spring.jpa.hibernate.ddl-auto=update --spring.datasource.url=jdbc:mysql://db:3306/${MYSQL_DATABASE} --spring.datasource.username=${MYSQL_USER} --spring.datasource.password=${MYSQL_PASSWORD} --spring.datasource.driver-class-name=com.mysql.jdbc.Driver --mqtt.broker=tcp://broker:1883
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:12345/api/v1/posts || exit 1
+      interval: 60s
+      retries: 5
+      start_period: 20s
+      timeout: 10s
+    networks:
+      - dbnet
+      - publicnet
+
   # vgl. docker run -d --name db --network app-example -e "MYSQL_USER=${MYSQL_USER}" -e "MYSQL_PASSWORD=${MYSQL_PASSWORD}" -e "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}" -e "MYSQL_DATABASE=${MYSQL_DATABASE}" mysql:5.7
   db:
     image: mysql:5.7
-    # Docker bietet? Volumes über Host-System oder über Docker-Managed Volume
     volumes:
       - mysql_data:/var/lib/mysql
-    depends_on:
-      - app
     environment:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
@@ -49,6 +57,9 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
 #    ports:
 #      - 3306:3306
+    networks:
+      - dbnet
+
   broker:
     image: eclipse-mosquitto
     volumes:
@@ -58,6 +69,9 @@ services:
 #    ports:
 #      - 1883:1883
 #      - 9001:9001
+    networks:
+      - dbnet
+
   proxy:
     image: nginx:1.21
     ports:
@@ -66,23 +80,28 @@ services:
       - "./nginx.conf:/etc/nginx/nginx.conf"
     depends_on:
       - app
+    networks:
+      - publicnet
 
 volumes:
   mysql_data:
   mosquitto_data:
   mosquitto_log:
-      
+
+networks:
+  dbnet:
+  publicnet:
 
 # Docker Compose erwartet im aktuellen Ordner eine docker-compose.yml
-# -> sollte die nicht existieren gibt es fallbacks
+# -> sollte die nicht existieren gibt es fallbacks (z.B. überordner), wenn keine existiert, dann gibt es fehler
 # Namen von Containern die sich aus Docker-Compose ergeben haben eine bestimmte Benennung
 # -> 14-spring-hexa-3-app-1
-# -> Projekt-Ordner / -Root + Service-Name + Nummerierung
-# Steuerung
-# -> wie bisher über die Docker CLI, mittels vollständigem Namen
-# -> oder im Ordner wo die Compose-Config liegt mit Service-Namen
-# -> start, stop, restart, rm, kill mit Namen um gezielt Services zu steuern, leerzeichengetrennt für mehrere
-# -> up startet immer alle Dienste oder für bestimmte Services
+# -> "Projekt-Ordner / -Root" + "Service-Name" + "Nummerierung"
+# Steuerung von Containern
+# -> wie bisher über die Docker CLI, mittels vollständigem Namen der Container
+# -> oder im Ordner wo die Compose-Config liegt mit Service-Namen der Docker-Compose-Dateien
+# -> start, stop, restart, rm, kill mit Service-Namen um gezielt Services zu steuern, leerzeichengetrennt für mehrere
+# -> up startet immer alle Dienste oder für bestimmte Services wenn Namen angegeben werden
 #    -> prüft, was aktuell existiert, startet nur modifzierte Container
 #    -> Kombiniert pull, falls nicht existiert, create und start von Images/Containern
 # -> down fährt _alle_ Container runter und entfernt sie
@@ -90,7 +109,7 @@ volumes:
 
 
 # -> volumes
-# -> netzwerken
+# -> networks
 # -> port-mapping
 # -> env
 # -> args
